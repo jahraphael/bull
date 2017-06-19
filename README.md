@@ -11,7 +11,7 @@ Bull Job Manager
 
 <img src="https://image.freepik.com/free-icon/strong-bull-side-view_318-52710.jpg" width="200" />
 
-The fastest, most reliable redis based queue for nodejs.
+The fastest, more reliable redis based queue for nodejs.
 Carefully written for rock solid stability and atomicity.
 
 
@@ -32,7 +32,7 @@ Are you developing bull sponsored by a company? Please, let us now!
 Features:
 ---------
 
-- Minimal CPU usage by poll-free design.
+- Minimal CPU usage by poll free design.
 - Robust design based on Redis.
 - Delayed jobs.
 - Retries.
@@ -55,8 +55,6 @@ We also have an official UI which is at the moment bare bones project: [bull-ui]
 Roadmap:
 --------
 
-- Multiple job types per queue.
-- Scheduling jobs as a cron specification.
 - Rate limiter for jobs.
 - Parent-child jobs relationships.
 
@@ -308,7 +306,7 @@ This can be achieved using the "createClient" option in the queue constructor:
 Useful patterns
 ---------------
 
-#### Message Queue
+####Message Queue
 
 Bull can also be used for persistent message queues. This is a quite useful
 feature in some usecases. For example, you can have two servers that need to
@@ -323,8 +321,8 @@ var Queue = require('bull');
 var sendQueue = Queue("Server B");
 var receiveQueue = Queue("Server A");
 
-receiveQueue.process(function(job, done){
-  console.log("Received message", job.data.msg);
+receiveQueue.process(function(msg, done){
+  console.log("Received message", msg);
   done();
 });
 
@@ -338,8 +336,8 @@ var Queue = require('bull');
 var sendQueue = Queue("Server A");
 var receiveQueue = Queue("Server B");
 
-receiveQueue.process(function(job, done){
-  console.log("Received message", job.data.msg);
+receiveQueue.process(function(msg, done){
+  console.log("Received message", msg);
   done();
 });
 
@@ -347,7 +345,7 @@ sendQueue.add({msg:"World"});
 ```
 
 
-#### Returning job completions
+####Returning job completions
 
 A common pattern is where you have a cluster of queue processors that just
 process jobs as fast as they can, and some other services that need to take the
@@ -362,7 +360,7 @@ message is send to a results message queue with the result data, this queue is
 listened by some other service that stores the results in a database.
 
 
-## Documentation
+##Documentation
 
 * [Queue](#queue)
 * [Queue##process](#process)
@@ -382,9 +380,7 @@ listened by some other service that stores the results in a database.
 ## Reference
 
 <a name="queue"/>
-
-### Queue
-
+###Queue
 ```ts
 Queue(queueName: string, redisPort: number, redisHost: string, redisOpts?: RedisOpts): Queue
 ```
@@ -419,9 +415,7 @@ __Arguments__
 
 
 <a name="process"/>
-
-#### Queue##Process
-
+####Queue##Process
 ```ts
 process(concurrency?: number, processor: (job, done?) => Promise<any>)
 ```
@@ -468,13 +462,17 @@ queue.process(function(job) { // No done callback here :)
 
 You can specify a concurrency. Bull will then call you handler in parallel respecting this max number.
 
+__Arguments__
+
+```javascript
+    job {String} The job to process.
+    done {Function} The done callback to be called after the job has been completed.
+```
 
 ---------------------------------------
 
 <a name="add"/>
-
 #### Queue##add
-
 ```ts
 add(data: any, opts?: JobOpt): Promise<Job>
 ```
@@ -523,9 +521,7 @@ interface BackoffOpts{
 
 
 <a name="pause"/>
-
 #### Queue##pause
-
 ```ts
 pause(isLocal?: boolean): Promise
 ```
@@ -544,9 +540,7 @@ Pausing a queue that is already paused does nothing.
 
 
 <a name="resume"/>
-
 #### Queue##resume
-
 ```ts
 resume(isLocal?: boolean): Promise
 ```
@@ -563,9 +557,7 @@ Resuming a queue that is not paused does nothing.
 
 
 <a name="count"/>
-
 #### Queue##count
-
 ```ts
 count(): Promise<number>
 ```
@@ -578,9 +570,7 @@ value may be true only for a very small amount of time.
 ---------------------------------------
 
 <a name="empty"/>
-
 #### Queue##empty
-
 ```ts
 empty(): Promise
 ```
@@ -591,9 +581,7 @@ Empties a queue deleting all the input lists and associated jobs.
 ---------------------------------------
 
 <a name="close"/>
-
 #### Queue##close
-
 ```ts
 close(): Promise
 ```
@@ -645,9 +633,7 @@ queue.process(function (job) {
 ---------------------------------------
 
 <a name="getJob"/>
-
 #### Queue##getJob
-
 ```ts
 getJob(jobId: string): Promise<Job>
 ```
@@ -659,9 +645,7 @@ parameter. If the specified job cannot be located, the promise will be resolved 
 ---------------------------------------
 
 <a name="getJobCounts"/>
-
 #### Queue##getJobCounts
-
 ```ts
 getJobCounts() : Promise<JobCounts>
 ```
@@ -682,9 +666,7 @@ Returns a promise that will return the job counts for the given queue.
 ---------------------------------------
 
 <a name="clean"/>
-
 #### Queue##clean
-
 ```ts
 clean(grace: number, status?: string, limit?: number): Promise<number[]>
 ```
@@ -725,7 +707,6 @@ The cleaner emits the `cleaned` event anytime the queue is cleaned.
 ---------------------------------------
 
 <a name="job"/>
-
 ### Job
 
 A job includes all data needed to perform its execution, as well as the progress
@@ -738,9 +719,7 @@ perform the job.
 ---------------------------------------
 
 <a name="remove"/>
-
 #### Job##remove
-
 ```ts
 remove(): Promise
 ```
@@ -751,9 +730,7 @@ Removes a Job from the queue from all the lists where it may be included.
 ---------------------------------------
 
 <a name="retry"/>
-
 #### Job##retry
-
 ```ts
 retry(): Promise
 ```
@@ -764,9 +741,7 @@ Re-run a Job that has failed. Returns a promise that resolves when the job is sc
 ---------------------------------------
 
 <a name="discard"/>
-
 #### Job##discard
-
 ```ts
 discard(): Promise
 ```
@@ -776,9 +751,7 @@ Ensure this job is never ran again even if attemptsMade is less than `job.attemp
 ---------------------------------------
 
 <a name="promote"/>
-
 #### Job##promote
-
 ```ts
 promote(): Promise
 ```
@@ -789,7 +762,6 @@ possible.
 ---------------------------------------
 
 <a name="priorityQueue"/>
-
 ###PriorityQueue(queueName, redisPort, redisHost, [redisOpts])
 
 ### DEPRECATION notice
@@ -821,7 +793,7 @@ The priority queue will process more often higher priority jobs than lower.
 Warning!!: Priority queue use 5 times more redis connections than a normal queue.
 
 
-#### Debugging
+####Debugging
 
 To see debug statements set or add `bull` to the NODE_DEBUG environment variable.
 
